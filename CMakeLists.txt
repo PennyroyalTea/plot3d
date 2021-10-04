@@ -3,4 +3,4 @@ project(3dGraphBuilder)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(3dGraphBuilder main.cpp)
+add_executable(3dGraphBuilder main.cpp Function.cpp Function.h)
