@@ -22,7 +22,7 @@ endif()
 
 set(TARGET_NAME "${PROJECT_NAME}")
 
-add_executable(${TARGET_NAME} main.cpp Graphics.h)
+add_executable(${TARGET_NAME} main.cpp Scene.cpp Scene.h Mesh.cpp Mesh.h Graphics.h Function.cpp Function.h)
 target_include_directories(${TARGET_NAME} PUBLIC
         "${SDL2_INCLUDE_DIRS}"
         "${GLEW_INCLUDE_DIRS}"
