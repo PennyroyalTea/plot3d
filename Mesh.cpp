@@ -19,9 +19,9 @@ std::vector<Mesh::surfaceVertex> generateVertices(int gridN, const Function& f, 
                 color[i] = part * color0[i] + (1. - part) * color1[i];
             }
 
-            float xNorm = (i + .0f) / gridN;
-            float yNorm = (j + .0f) / gridN;
-            float zNorm = (z - f.zRange.first) / (f.zRange.second - f.zRange.first);
+            float xNorm = 2 * (i + .0f) / gridN - 1;
+            float yNorm = 2 * (j + .0f) / gridN - 1;
+            float zNorm = 2 * (z - f.zRange.first) / (f.zRange.second - f.zRange.first) - 1;
 
             res.push_back({{xNorm, yNorm, zNorm}, {color[0], color[1], color[2]}});
         }
@@ -36,8 +36,8 @@ std::vector<std::uint32_t> generateVerticesOrder(int gridN) {
             res.push_back(i + j * (gridN + 1));
             res.push_back(i + 1 + j * (gridN + 1));
             res.push_back(i + (j + 1) * (gridN + 1));
-            res.push_back(i + 1 + j * (gridN + 1));
             res.push_back(i + (j + 1) * (gridN + 1));
+            res.push_back(i + 1 + j * (gridN + 1));
             res.push_back(i + 1 + (j + 1) * (gridN + 1));
         }
     }

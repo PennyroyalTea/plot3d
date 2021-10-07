@@ -3,13 +3,13 @@
 const char vertex_shader_source[] =
         R"(#version 330 core
 uniform mat4 transform;
-
+uniform mat4 view;
 layout (location = 0) in vec3 in_position;
 layout (location = 1) in vec4 in_color;
 out vec4 color;
 void main()
 {
-	gl_Position = transform * vec4(in_position, 1.0);
+	gl_Position = view * transform * vec4(in_position, 1.0);
 	color = in_color;
 }
 )";
@@ -123,9 +123,9 @@ Scene::Scene() {
     program = create_program(vertex_shader, fragment_shader);
 
     glEnable(GL_DEPTH_TEST);
-//    glEnable(GL_CULL_FACE);
 
     transformLocation = glGetUniformLocation(program, "transform");
+    viewLocation = glGetUniformLocation(program, "view");
 
     lastFrameStart = std::chrono::high_resolution_clock::now();
     currentTime = 0.f;
@@ -141,6 +141,11 @@ void Scene::addObject(std::unique_ptr<Mesh::Mesh> mesh) {
 }
 
 void Scene::drawingLoop() {
+    std::map<SDL_Keycode, bool> button_down;
+
+    float alpha = 0.f;
+    float beta = 0.f;
+    float gamma = 0.f;
 
     bool running = true;
     while (running) {
@@ -157,6 +162,12 @@ void Scene::drawingLoop() {
                             break;
                     }
                     break;
+                case SDL_KEYDOWN:
+                    button_down[event.key.keysym.sym] = true;
+                    break;
+                case SDL_KEYUP:
+                    button_down[event.key.keysym.sym] = false;
+                    break;
         }
         if (!running) {
             break;
@@ -166,6 +177,19 @@ void Scene::drawingLoop() {
         lastFrameStart = now;
         currentTime += dt;
 
+        if (button_down[SDLK_LEFT]) {
+            alpha -= 3 * dt;
+        }
+        if (button_down[SDLK_RIGHT]) {
+            alpha += 3 * dt;
+        }
+        if (button_down[SDLK_UP]) {
+            gamma += 3 * dt;
+        }
+        if (button_down[SDLK_DOWN]) {
+            gamma -= 3 * dt;
+        }
+
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -173,14 +197,40 @@ void Scene::drawingLoop() {
 
         glUseProgram(program);
 
+        float aspectRatio = (height + .0f) / width;
+
+        float near = 0.01f;
+        float far = 100.f;
+
+        float right = near;
+        float top = aspectRatio * right;
+
+        float A = (far + near) / (near - far);
+        float B = (2 * far * near) / (near - far);
+
+        float C = near / right;
+        float D = near / top;
+
+        float view[16] = {
+                C, 0, 0, 0,
+                0, D, 0, 0,
+                0, 0, A, B,
+                0, 0, -1, 0,
+        };
+
+        float scale = 2.f;
+
         float transform[16] = {
-                1, 0, 0, 0,
-                0, cos(currentTime), sin(currentTime), 0,
-                0, -sin(currentTime), cos(currentTime), 0,
+                scale * cos(alpha) * cos(beta), scale * sin(alpha) * cos(beta), scale * -sin(beta), 0,
+                scale * (cos(alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma)), scale * (sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma)), scale * cos(beta) * sin(gamma), 0,
+                scale * (cos(alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma)), scale * (sin(alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma)), scale * cos(beta) * cos(gamma), -5.f,
                 0, 0, 0, 1
         };
 
+
+
         glUniformMatrix4fv(transformLocation, 1, GL_TRUE, transform);
+        glUniformMatrix4fv(viewLocation, 1, GL_TRUE, view);
 
 
         for (std::unique_ptr<Mesh::Mesh>& mesh : meshes) {

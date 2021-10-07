@@ -3,6 +3,7 @@
 
 #include "cmath"
 #include "string"
+#include "map"
 #include "chrono"
 #include "vector"
 #include "memory"
@@ -27,4 +28,5 @@ private:
 
     GLuint program;
     GLuint transformLocation;
+    GLuint viewLocation;
 };
