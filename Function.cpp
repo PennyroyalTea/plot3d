@@ -1,11 +1,10 @@
-#include <cmath>
-
 #include "Function.h"
 
-double Functions::Plane::operator()(double x, double y, double t) {
-    return 1.0;
-}
+Function::Function(std::function<float(float, float, float)> f,
+                   std::pair<float, float> xRange,
+                   std::pair<float, float> yRange,
+                   std::pair<float, float> zRange) : f(f), xRange(xRange), yRange(yRange), zRange(zRange) {}
 
-double Functions::Spikes::operator()(double x, double y, double t) {
-    return (x - floor(x)) + (y - floor(y)) + (t - floor(t));
-}
+float Function::operator()(float x, float y, float t) const {
+    return f(x, y, t);
+};

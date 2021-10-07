@@ -2,33 +2,23 @@
 
 const char vertex_shader_source[] =
         R"(#version 330 core
-
-const vec2 VERTICES[3] = vec2[3](
-	vec2(0.0, 0.0),
-	vec2(1.0, 0.0),
-	vec2(0.0, 1.0)
-);
-
-out vec3 color;
-
+layout (location = 0) in vec3 in_position;
+layout (location = 1) in vec4 in_color;
+out vec4 color;
 void main()
 {
-	vec2 position = VERTICES[gl_VertexID];
-	gl_Position = vec4(position, 0.0, 1.0);
-	color = vec3(position, 0.0);
+	gl_Position = vec4(in_position, 1.0);
+	color = in_color;
 }
 )";
 
 const char fragment_shader_source[] =
         R"(#version 330 core
-
-in vec3 color;
-
+in vec4 color;
 layout (location = 0) out vec4 out_color;
-
 void main()
 {
-	out_color = vec4(color, 1.0);
+	out_color = color;
 }
 )";
 
@@ -88,12 +78,12 @@ void initSDL(SDL_GLContext& glContext, SDL_Window*& window, int& width, int& hei
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-//    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-//    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-//    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-//    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-//    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-//    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
     window = SDL_CreateWindow("3D plot builder",
                                            SDL_WINDOWPOS_CENTERED,
@@ -130,8 +120,6 @@ Scene::Scene() {
     auto fragment_shader = create_shader(GL_FRAGMENT_SHADER, fragment_shader_source);
     program = create_program(vertex_shader, fragment_shader);
 
-    glGenVertexArrays(1, &vao);
-
 //    glEnable(GL_DEPTH_TEST);
 //    glEnable(GL_CULL_FACE);
 
@@ -144,7 +132,12 @@ Scene::~Scene() {
     SDL_DestroyWindow(window);
 }
 
+void Scene::addObject(std::unique_ptr<Mesh::Mesh> mesh) {
+    meshes.push_back(std::move(mesh));
+}
+
 void Scene::drawingLoop() {
+
     bool running = true;
     while (running) {
         for (SDL_Event event; SDL_PollEvent(&event);) switch (event.type) {
@@ -176,8 +169,9 @@ void Scene::drawingLoop() {
 
         glUseProgram(program);
 
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        for (std::unique_ptr<Mesh::Mesh>& mesh : meshes) {
+            mesh -> draw(currentTime);
+        }
 
         SDL_GL_SwapWindow(window);
     }
