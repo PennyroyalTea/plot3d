@@ -1,8 +1,8 @@
 #include <array>
 #include "Mesh.h"
 
-std::vector<Mesh::surfaceVertex> generateVertices(int gridN, const Function& f, float t) {
-    std::vector<Mesh::surfaceVertex> res;
+std::vector<Mesh::vertex> generateSurfaceVertices(int gridN, const Function& f, float t) {
+    std::vector<Mesh::vertex> res;
     float xStep = (f.xRange.second - f.xRange.first) / gridN;
     float yStep = (f.yRange.second - f.yRange.first) / gridN;
     for (int i = 0; i <= gridN; ++i) {
@@ -29,7 +29,7 @@ std::vector<Mesh::surfaceVertex> generateVertices(int gridN, const Function& f, 
     return res;
 }
 
-std::vector<std::uint32_t> generateVerticesOrder(int gridN) {
+std::vector<std::uint32_t> generateSurfaceVerticesOrder(int gridN) {
     std::vector<std::uint32_t> res;
     for (int i = 0; i < gridN; ++i) {
         for (int j = 0; j < gridN; ++j) {
@@ -45,20 +45,20 @@ std::vector<std::uint32_t> generateVerticesOrder(int gridN) {
 }
 
 Mesh::Surface::Surface(Function f, int gridN): gridN(gridN), f(std::move(f)) {
-    vertices = generateVertices(gridN, f, 0);
-    verticesOrder = generateVerticesOrder(gridN);
+    vertices = generateSurfaceVertices(gridN, f, 0);
+    verticesOrder = generateSurfaceVerticesOrder(gridN);
 
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(surfaceVertex), vertices.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), vertices.data(), GL_DYNAMIC_DRAW);
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
     glEnableVertexAttribArray(0); // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(surfaceVertex), (void*)nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)nullptr);
     glEnableVertexAttribArray(1); // color
-    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(surfaceVertex), (void*) offsetof(surfaceVertex, color));
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex), (void*) offsetof(vertex, color));
 
     glGenBuffers(1, &ebo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -72,4 +72,44 @@ void Mesh::Surface::draw(float t) {
     glBindVertexArray(vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glDrawElements(GL_TRIANGLES, verticesOrder.size(), GL_UNSIGNED_INT, nullptr);
+}
+
+std::vector<Mesh::vertex> generateGridVertices(int gridN) {
+    std::vector<Mesh::vertex> res;
+    float step = 0.25f;
+    for (int i = 0; i < gridN; ++i) {
+        res.push_back({{i * step, -gridN * step, 0.f}, {255, 255, 255}});
+        res.push_back({{i * step, gridN * step, 0.f}, {255, 255, 255}});
+        res.push_back({{-i * step, -gridN * step, 0.f}, {255, 255, 255}});
+        res.push_back({{-i * step, gridN * step, 0.f}, {255, 255, 255}});
+
+        res.push_back({{-gridN * step, i * step, 0.f}, {255, 255, 255}});
+        res.push_back({{gridN * step, i * step, 0.f}, {255, 255, 255}});
+        res.push_back({{-gridN * step, -i * step, 0.f}, {255, 255, 255}});
+        res.push_back({{gridN * step, -i * step, 0.f}, {255, 255, 255}});
+    }
+    return res;
+}
+
+Mesh::Grid::Grid(int gridN) {
+    vertices = generateGridVertices(gridN);
+
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), vertices.data(), GL_DYNAMIC_DRAW);
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    glEnableVertexAttribArray(0); // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)nullptr);
+    glEnableVertexAttribArray(1); // color
+    glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex), (void*) offsetof(vertex, color));
+}
+
+void Mesh::Grid::draw(float t) {
+    std::cout << "drawing grid" << std::endl;
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_LINES, 0, vertices.size());
 }

@@ -16,7 +16,7 @@ namespace Mesh {
         virtual void draw(float t) = 0;
     };
 
-    struct surfaceVertex {
+    struct vertex {
         float pos[3];
         std::uint8_t color[3];
     };
@@ -29,12 +29,23 @@ namespace Mesh {
         Function f;
         int gridN;
 
-        std::vector<surfaceVertex> vertices;
+        std::vector<vertex> vertices;
         std::vector<std::uint32_t> verticesOrder;
 
         GLuint vbo;
         GLuint vao;
         GLuint ebo;
+    };
+
+    class Grid : public Mesh {
+    public:
+        Grid(int gridN);
+        void draw(float t) override;
+    private:
+        std::vector<vertex> vertices;
+
+        GLuint vbo;
+        GLuint vao;
     };
 }
 

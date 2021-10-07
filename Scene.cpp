@@ -116,7 +116,7 @@ void initSDL(SDL_GLContext& glContext, SDL_Window*& window, int& width, int& hei
 Scene::Scene() {
     initSDL(glContext, window, width, height);
 
-    glClearColor(0.8f, 0.8f, 1.f, 0.f);
+    glClearColor(0.2f, 0.2f, 0.2f, 0.f);
 
     auto vertex_shader = create_shader(GL_VERTEX_SHADER, vertex_shader_source);
     auto fragment_shader = create_shader(GL_FRAGMENT_SHADER, fragment_shader_source);
@@ -143,9 +143,8 @@ void Scene::addObject(std::unique_ptr<Mesh::Mesh> mesh) {
 void Scene::drawingLoop() {
     std::map<SDL_Keycode, bool> button_down;
 
-    float alpha = 0.f;
-    float beta = 0.f;
-    float gamma = 0.f;
+    float alpha = .785f;
+    float gamma = .785f;
 
     bool running = true;
     while (running) {
@@ -185,9 +184,15 @@ void Scene::drawingLoop() {
         }
         if (button_down[SDLK_UP]) {
             gamma += 3 * dt;
+            if (gamma > M_PI) {
+                gamma = M_PI;
+            }
         }
         if (button_down[SDLK_DOWN]) {
             gamma -= 3 * dt;
+            if (gamma < 0) {
+                gamma = 0;
+            }
         }
 
         glClear(GL_COLOR_BUFFER_BIT);
@@ -221,9 +226,9 @@ void Scene::drawingLoop() {
         float scale = 2.f;
 
         float transform[16] = {
-                scale * cos(alpha) * cos(beta), scale * sin(alpha) * cos(beta), scale * -sin(beta), 0,
-                scale * (cos(alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma)), scale * (sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma)), scale * cos(beta) * sin(gamma), 0,
-                scale * (cos(alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma)), scale * (sin(alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma)), scale * cos(beta) * cos(gamma), -5.f,
+                scale * cos(alpha), scale * sin(alpha), 0, 0,
+                scale * -sin(alpha) * cos(gamma), scale * cos(alpha) * cos(gamma), scale * sin(gamma), 0,
+                scale * sin(alpha) * sin(gamma), scale * -cos(alpha) * sin(gamma), scale * cos(gamma), -5.f,
                 0, 0, 0, 1
         };
 

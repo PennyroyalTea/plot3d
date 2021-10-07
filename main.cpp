@@ -10,12 +10,14 @@ int main() {
     Scene scene;
 
     Function f(
-            [](float x, float y, float t) {return 2 * x * x - 1;},
+            [](float x, float y, float t) {return 2 * (x * x + y * y) / 2 - 1;},
             {-1, 1}, {-1, 1}, {-1, 1});
 
     std::unique_ptr<Mesh::Mesh> surface = std::make_unique<Mesh::Surface>(f, 50);
+    std::unique_ptr<Mesh::Mesh> grid = std::make_unique<Mesh::Grid>(30);
 
     scene.addObject(std::move(surface));
+    scene.addObject(std::move(grid));
 
     scene.drawingLoop();
     return 0;
