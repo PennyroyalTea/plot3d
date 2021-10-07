@@ -2,12 +2,14 @@
 
 const char vertex_shader_source[] =
         R"(#version 330 core
+uniform mat4 transform;
+
 layout (location = 0) in vec3 in_position;
 layout (location = 1) in vec4 in_color;
 out vec4 color;
 void main()
 {
-	gl_Position = vec4(in_position, 1.0);
+	gl_Position = transform * vec4(in_position, 1.0);
 	color = in_color;
 }
 )";
@@ -120,8 +122,10 @@ Scene::Scene() {
     auto fragment_shader = create_shader(GL_FRAGMENT_SHADER, fragment_shader_source);
     program = create_program(vertex_shader, fragment_shader);
 
-//    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 //    glEnable(GL_CULL_FACE);
+
+    transformLocation = glGetUniformLocation(program, "transform");
 
     lastFrameStart = std::chrono::high_resolution_clock::now();
     currentTime = 0.f;
@@ -163,11 +167,21 @@ void Scene::drawingLoop() {
         currentTime += dt;
 
         glClear(GL_COLOR_BUFFER_BIT);
-//        glClear(GL_DEPTH_BUFFER_BIT);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
 
 
         glUseProgram(program);
+
+        float transform[16] = {
+                1, 0, 0, 0,
+                0, cos(currentTime), sin(currentTime), 0,
+                0, -sin(currentTime), cos(currentTime), 0,
+                0, 0, 0, 1
+        };
+
+        glUniformMatrix4fv(transformLocation, 1, GL_TRUE, transform);
+
 
         for (std::unique_ptr<Mesh::Mesh>& mesh : meshes) {
             mesh -> draw(currentTime);

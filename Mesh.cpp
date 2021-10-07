@@ -18,7 +18,12 @@ std::vector<Mesh::surfaceVertex> generateVertices(int gridN, const Function& f, 
             for (int i = 0; i < 3; ++i) {
                 color[i] = part * color0[i] + (1. - part) * color1[i];
             }
-            res.push_back({{x, y, 1.0f}, {color[0], color[1], color[2]}});
+
+            float xNorm = (i + .0f) / gridN;
+            float yNorm = (j + .0f) / gridN;
+            float zNorm = (z - f.zRange.first) / (f.zRange.second - f.zRange.first);
+
+            res.push_back({{xNorm, yNorm, zNorm}, {color[0], color[1], color[2]}});
         }
     }
     return res;

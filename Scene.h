@@ -1,6 +1,7 @@
 #include "Graphics.h"
 #include "Mesh.h"
 
+#include "cmath"
 #include "string"
 #include "chrono"
 #include "vector"
@@ -25,4 +26,5 @@ private:
     float currentTime;
 
     GLuint program;
+    GLuint transformLocation;
 };

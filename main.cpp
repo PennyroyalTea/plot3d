@@ -10,10 +10,10 @@ int main() {
     Scene scene;
 
     Function f(
-            [](float x, float y, float t) {return x;},
+            [](float x, float y, float t) {return 2 * x * x - 1;},
             {-1, 1}, {-1, 1}, {-1, 1});
 
-    std::unique_ptr<Mesh::Mesh> surface = std::make_unique<Mesh::Surface>(f, 3);
+    std::unique_ptr<Mesh::Mesh> surface = std::make_unique<Mesh::Surface>(f, 50);
 
     scene.addObject(std::move(surface));
 
