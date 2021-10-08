@@ -125,23 +125,14 @@ void addMarchingTriangle(std::vector<Mesh::vertex>& res, const Function& f, int 
         y[iter] = f.yRange.first + stepY * j[iter];
         fx[iter] = f(x[iter], y[iter], t);
     }
-    std::vector<Mesh::vertex> tmp;
     for (int iter = 0; iter < 3; ++iter) {
         int iter1 = (iter + 1) % 3;
         if ((fx[iter] - z) * (fx[iter1] - z) < 0) {
-            tmp.push_back({{x[iter], y[iter], fx[iter]}, {255, 255, 0}});
-            tmp.push_back({{x[iter1], y[iter1], fx[iter1]}, {255, 255, 0}});
-
             float k = abs(fx[iter] - z) / abs(fx[iter] - fx[iter1]);
-            std::cout << "k = " << k << "add isopoint: " << k * x[iter] + (1 - k) * x[iter1] << " " << k * y[iter] + (1 - k) * y[iter1] << " " << z << std::endl;
             res.push_back(
                     {{k * x[iter1] + (1 - k) * x[iter], k * y[iter1] + (1 - k) * y[iter], z},
                      {0, 255, 0}});
         }
-    }
-
-    for (const auto& v : tmp){
-        res.push_back(v);
     }
 
 }
