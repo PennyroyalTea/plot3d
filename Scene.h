@@ -12,7 +12,7 @@ class Scene {
 public:
     Scene();
     ~Scene();
-    void addObject(std::unique_ptr<Mesh::Mesh> mesh);
+    void addObject(std::unique_ptr<Mesh> mesh);
     void drawingLoop();
 private:
     SDL_GLContext glContext;
@@ -21,7 +21,7 @@ private:
     int width;
     int height;
 
-    std::vector<std::unique_ptr<Mesh::Mesh>> meshes;
+    std::vector<std::unique_ptr<Mesh>> meshes;
 
     std::chrono::time_point<std::chrono::high_resolution_clock> lastFrameStart;
     float currentTime;

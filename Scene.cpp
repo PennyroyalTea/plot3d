@@ -136,7 +136,7 @@ Scene::~Scene() {
     SDL_DestroyWindow(window);
 }
 
-void Scene::addObject(std::unique_ptr<Mesh::Mesh> mesh) {
+void Scene::addObject(std::unique_ptr<Mesh> mesh) {
     meshes.push_back(std::move(mesh));
 }
 
@@ -238,7 +238,7 @@ void Scene::drawingLoop() {
         glUniformMatrix4fv(viewLocation, 1, GL_TRUE, view);
 
 
-        for (std::unique_ptr<Mesh::Mesh>& mesh : meshes) {
+        for (std::unique_ptr<Mesh>& mesh : meshes) {
             mesh -> draw(currentTime);
         }
 
