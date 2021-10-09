@@ -34,8 +34,14 @@ Grid::Grid(int gridN) {
 }
 
 void Grid::draw(float t) {
-    std::cout << "drawing grid" << std::endl;
+    if (!doDraw) {
+        return;
+    }
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindVertexArray(vao);
     glDrawArrays(GL_LINES, 0, vertices.size());
+}
+
+void Grid::updateSettings(const std::map<int, int>& settings) {
+    doDraw = settings.at(DRAW_GRID);
 }

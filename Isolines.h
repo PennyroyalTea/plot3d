@@ -6,6 +6,7 @@ class Isolines : public Mesh {
 public:
     Isolines(Function f, int gridN, int isolinesN);
     void draw(float t) override;
+    void updateSettings(const std::map<int, int>& settings) override;
 private:
     Function f;
 

@@ -66,11 +66,25 @@ Surface::Surface(Function f, int gridN): gridN(gridN), f(std::move(f)) {
 
 
 void Surface::draw(float t) {
-    std::cout << "drawing surface" << std::endl;
     vertices = generateSurfaceVertices(gridN, f, t);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), vertices.data(), GL_STREAM_DRAW);
     glBindVertexArray(vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glDrawElements(GL_TRIANGLES, verticesOrder.size(), GL_UNSIGNED_INT, nullptr);
+}
+
+void Surface::updateSettings(const std::map<int, int>& settings) {
+    if (settings.at(QUALITY_N) != gridN) {
+        gridN = settings.at(QUALITY_N);
+        verticesOrder = generateSurfaceVerticesOrder(gridN);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, verticesOrder.size() * sizeof(std::uint32_t), verticesOrder.data(), GL_DYNAMIC_DRAW);
+
+    }
+    if (settings.at(DRAW_FACES)) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    } else {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
 }

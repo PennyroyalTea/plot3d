@@ -6,7 +6,9 @@ class Grid : public Mesh {
 public:
     Grid(int gridN);
     void draw(float t) override;
+    void updateSettings(const std::map<int, int>& settings) override;
 private:
+    bool doDraw;
     std::vector<vertex> vertices;
 
     GLuint vbo;

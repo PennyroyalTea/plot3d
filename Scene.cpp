@@ -141,10 +141,25 @@ void Scene::addObject(std::unique_ptr<Mesh> mesh) {
 }
 
 void Scene::drawingLoop() {
+    std::map<int, int> settings = {
+            {DRAW_GRID, 0},
+            {DRAW_FACES, 1},
+            {ISOLINES_N, 0},
+            {QUALITY_N, 3}
+    };
+
+    for (std::unique_ptr<Mesh>& mesh : meshes) {
+        mesh ->updateSettings(settings);
+    }
+
     std::map<SDL_Keycode, bool> button_down;
+    std::map<SDL_Keycode, bool> wasPressed;
 
     float alpha = .785f;
     float gamma = .785f;
+
+    float rotationSpeedAlpha = 2.5f;
+    float rotationSpeedGamma = 2.5f;
 
     bool running = true;
     while (running) {
@@ -177,21 +192,76 @@ void Scene::drawingLoop() {
         currentTime += dt;
 
         if (button_down[SDLK_LEFT]) {
-            alpha -= 3 * dt;
+            alpha -= rotationSpeedAlpha * dt;
         }
         if (button_down[SDLK_RIGHT]) {
-            alpha += 3 * dt;
+            alpha += rotationSpeedAlpha * dt;
         }
         if (button_down[SDLK_UP]) {
-            gamma += 3 * dt;
-            if (gamma > M_PI) {
-                gamma = M_PI;
-            }
+            gamma = std::min((float)M_PI, gamma + rotationSpeedGamma * dt);
         }
         if (button_down[SDLK_DOWN]) {
-            gamma -= 3 * dt;
-            if (gamma < 0) {
-                gamma = 0;
+            gamma = std::max(0.f, gamma - rotationSpeedGamma * dt);
+        }
+        if (button_down[SDLK_f]) {
+            wasPressed[SDLK_f] = true;
+        }
+        if (!button_down[SDLK_f] && wasPressed[SDLK_f]) {
+            wasPressed[SDLK_f] = false;
+            settings[DRAW_FACES] = 1 - settings[DRAW_FACES];
+            for (std::unique_ptr<Mesh>& mesh : meshes) {
+                mesh ->updateSettings(settings);
+            }
+        }
+        if (button_down[SDLK_g]) {
+            wasPressed[SDLK_g] = true;
+        }
+        if (!button_down[SDLK_g] && wasPressed[SDLK_g]) {
+            wasPressed[SDLK_g] = false;
+            settings[DRAW_GRID] = 1 - settings[DRAW_GRID];
+            for (std::unique_ptr<Mesh>& mesh : meshes) {
+                mesh ->updateSettings(settings);
+            }
+        }
+        if (button_down[SDLK_MINUS]) {
+            wasPressed[SDLK_MINUS] = true;
+        }
+        if (!button_down[SDLK_MINUS] && wasPressed[SDLK_MINUS]) {
+            wasPressed[SDLK_MINUS] = false;
+            settings[ISOLINES_N] = std::max(0, settings[ISOLINES_N] - 1);
+            for (std::unique_ptr<Mesh>& mesh : meshes) {
+                mesh ->updateSettings(settings);
+            }
+        }
+        if (button_down[SDLK_EQUALS]) {
+            wasPressed[SDLK_PLUS] = true;
+        }
+        if (!button_down[SDLK_EQUALS] && wasPressed[SDLK_PLUS]) {
+            wasPressed[SDLK_PLUS] = false;
+            settings[ISOLINES_N] += 1;
+            for (std::unique_ptr<Mesh>& mesh : meshes) {
+                mesh ->updateSettings(settings);
+            }
+        }
+
+        if (button_down[SDLK_COMMA]) {
+            wasPressed[SDLK_COMMA] = true;
+        }
+        if (!button_down[SDLK_COMMA] && wasPressed[SDLK_COMMA]) {
+            wasPressed[SDLK_COMMA] = false;
+            settings[QUALITY_N] = std::max(1, settings[QUALITY_N] - 1);
+            for (std::unique_ptr<Mesh>& mesh : meshes) {
+                mesh ->updateSettings(settings);
+            }
+        }
+        if (button_down[SDLK_PERIOD]) {
+            wasPressed[SDLK_PERIOD] = true;
+        }
+        if (!button_down[SDLK_PERIOD] && wasPressed[SDLK_PERIOD]) {
+            wasPressed[SDLK_PERIOD] = false;
+            settings[QUALITY_N] += 1;
+            for (std::unique_ptr<Mesh>& mesh : meshes) {
+                mesh ->updateSettings(settings);
             }
         }
 

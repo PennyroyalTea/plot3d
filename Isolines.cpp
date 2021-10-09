@@ -63,11 +63,15 @@ Isolines::Isolines(Function f, int gridN, int isolinesN) : f(std::move(f)), grid
 }
 
 void Isolines::draw(float t) {
-    std::cout << "drawing isolines" << std::endl;
     vertices = generateIsolinesVertices(gridN, isolinesN, f, t);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), vertices.data(), GL_STREAM_DRAW);
     glBindVertexArray(vao);
     glDrawArrays(GL_LINES, 0, vertices.size());
+}
+
+void Isolines::updateSettings(const std::map<int, int>& settings) {
+    gridN = settings.at(QUALITY_N);
+    isolinesN = settings.at(ISOLINES_N);
 }
