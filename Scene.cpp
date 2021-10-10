@@ -140,6 +140,43 @@ void Scene::addObject(std::unique_ptr<Mesh> mesh) {
     meshes.push_back(std::move(mesh));
 }
 
+void Scene::updateViewMatrix() {
+    float aspectRatio = (height + .0f) / width;
+
+    float near = 0.01f;
+    float far = 100.f;
+
+    float right = near;
+    float top = aspectRatio * right;
+
+    float A = (far + near) / (near - far);
+    float B = (2 * far * near) / (near - far);
+
+    float C = near / right;
+    float D = near / top;
+
+    viewMatrix = {
+            C, 0, 0, 0,
+            0, D, 0, 0,
+            0, 0, A, B,
+            0, 0, -1, 0,
+    };
+
+    glUniformMatrix4fv(viewLocation, 1, GL_TRUE, viewMatrix.data());
+}
+
+void Scene::updateTransformMatrix() {
+    float scale = 2.f;
+    transformMatrix = {
+            scale * cos(alpha), scale * sin(alpha), 0, 0,
+            scale * -sin(alpha) * cos(gamma), scale * cos(alpha) * cos(gamma), scale * sin(gamma), 0,
+            scale * sin(alpha) * sin(gamma), scale * -cos(alpha) * sin(gamma), scale * cos(gamma), -5.f,
+            0, 0, 0, 1
+    };
+
+    glUniformMatrix4fv(transformLocation, 1, GL_TRUE, transformMatrix.data());
+}
+
 void Scene::drawingLoop() {
     std::map<int, int> settings = {
             {DRAW_GRID, 0},
@@ -155,11 +192,15 @@ void Scene::drawingLoop() {
     std::map<SDL_Keycode, bool> button_down;
     std::map<SDL_Keycode, bool> wasPressed;
 
-    float alpha = .785f;
-    float gamma = .785f;
-
     float rotationSpeedAlpha = 2.5f;
     float rotationSpeedGamma = 2.5f;
+
+    alpha = .785f;
+    gamma = .785f;
+
+    glUseProgram(program);
+    updateViewMatrix();
+    updateTransformMatrix();
 
     bool running = true;
     while (running) {
@@ -173,6 +214,7 @@ void Scene::drawingLoop() {
                             width = event.window.data1;
                             height = event.window.data2;
                             glViewport(0, 0, width, height);
+                            updateViewMatrix();
                             break;
                     }
                     break;
@@ -193,15 +235,19 @@ void Scene::drawingLoop() {
 
         if (button_down[SDLK_LEFT]) {
             alpha -= rotationSpeedAlpha * dt;
+            updateTransformMatrix();
         }
         if (button_down[SDLK_RIGHT]) {
             alpha += rotationSpeedAlpha * dt;
+            updateTransformMatrix();
         }
         if (button_down[SDLK_UP]) {
             gamma = std::min((float)M_PI, gamma + rotationSpeedGamma * dt);
+            updateTransformMatrix();
         }
         if (button_down[SDLK_DOWN]) {
             gamma = std::max(0.f, gamma - rotationSpeedGamma * dt);
+            updateTransformMatrix();
         }
         if (button_down[SDLK_f]) {
             wasPressed[SDLK_f] = true;
@@ -267,46 +313,6 @@ void Scene::drawingLoop() {
 
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_DEPTH_BUFFER_BIT);
-
-
-
-        glUseProgram(program);
-
-        float aspectRatio = (height + .0f) / width;
-
-        float near = 0.01f;
-        float far = 100.f;
-
-        float right = near;
-        float top = aspectRatio * right;
-
-        float A = (far + near) / (near - far);
-        float B = (2 * far * near) / (near - far);
-
-        float C = near / right;
-        float D = near / top;
-
-        float view[16] = {
-                C, 0, 0, 0,
-                0, D, 0, 0,
-                0, 0, A, B,
-                0, 0, -1, 0,
-        };
-
-        float scale = 2.f;
-
-        float transform[16] = {
-                scale * cos(alpha), scale * sin(alpha), 0, 0,
-                scale * -sin(alpha) * cos(gamma), scale * cos(alpha) * cos(gamma), scale * sin(gamma), 0,
-                scale * sin(alpha) * sin(gamma), scale * -cos(alpha) * sin(gamma), scale * cos(gamma), -5.f,
-                0, 0, 0, 1
-        };
-
-
-
-        glUniformMatrix4fv(transformLocation, 1, GL_TRUE, transform);
-        glUniformMatrix4fv(viewLocation, 1, GL_TRUE, view);
-
 
         for (std::unique_ptr<Mesh>& mesh : meshes) {
             mesh -> draw(currentTime);
