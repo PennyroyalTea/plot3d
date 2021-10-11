@@ -12,27 +12,45 @@ std::vector<point2D> generateSurfaceGrid(int gridN, const Function& f) {
     return res;
 }
 
-std::vector<float> generateSurfaceValues(const std::vector<point2D>& grid, const Function& f, float t) {
+std::vector<float> generateSurfaceValues(int gridN, const Function& f, float t) {
     std::vector<float> res;
-    for (const auto& [x, y] : grid) {
-        res.push_back(f(x, y, t));
+
+    float xStep = (f.xRange.second - f.xRange.first) / gridN;
+    float yStep = (f.yRange.second - f.yRange.first) / gridN;
+
+    for (int i = 0; i <= gridN; ++i) {
+        for (int j = 0; j <= gridN; ++j) {
+            float x = f.xRange.first + xStep * i;
+            float y = f.yRange.first + yStep * j;
+            float z = f(x, y, t);
+            float zNorm = ((z - f.zRange.first) / (f.zRange.second - f.zRange.first)) * 2 - 1;
+            res.push_back(zNorm);
+        }
     }
     return res;
 }
 
-std::vector<color> generateSurfaceColors(const std::vector<point2D>& grid, const Function& f, float t) {
+std::vector<color> generateSurfaceColors(int gridN, const Function& f, float t) {
     std::vector<color> res;
 
     uint8_t color0[3] = {0xf0u, 0x48u, 0xc6u};
     uint8_t color1[3] = {0xf6u, 0xeau, 0x41u};
     uint8_t color[3];
-    for (const auto& [x, y] : grid) {
-        float z = f(x, y, t);
-        float part = (z - f.zRange.first) / (f.zRange.second - f.zRange.first);
-        for (int i = 0; i < 3; ++i) {
-            color[i] = part * color0[i] + (1. - part) * color1[i];
+
+    float xStep = (f.xRange.second - f.xRange.first) / gridN;
+    float yStep = (f.yRange.second - f.yRange.first) / gridN;
+
+    for (int i = 0; i <= gridN; ++i) {
+        for (int j = 0; j <= gridN; ++j) {
+            float x = f.xRange.first + xStep * i;
+            float y = f.yRange.first + yStep * j;
+            float z = f(x, y, t);
+            float part = (z - f.zRange.first) / (f.zRange.second - f.zRange.first);
+            for (int i = 0; i < 3; ++i) {
+                color[i] = part * color0[i] + (1. - part) * color1[i];
+            }
+            res.push_back({color[0], color[1], color[2]});
         }
-        res.push_back({color[0], color[1], color[2]});
     }
     return res;
 }
@@ -54,8 +72,8 @@ std::vector<std::uint32_t> generateSurfaceVerticesOrder(int gridN) {
 
 Surface::Surface(Function f, int gridN): gridN(gridN), f(std::move(f)) {
     verticesGrid = generateSurfaceGrid(gridN, f);
-    verticesValues = generateSurfaceValues(verticesGrid, f, 0.f);
-    verticesColors = generateSurfaceColors(verticesGrid, f, 0.f);
+    verticesValues = generateSurfaceValues(gridN, f, 0.f);
+    verticesColors = generateSurfaceColors(gridN, f, 0.f);
     verticesOrder = generateSurfaceVerticesOrder(gridN);
 
     glGenVertexArrays(1, &vao);
@@ -88,8 +106,8 @@ Surface::Surface(Function f, int gridN): gridN(gridN), f(std::move(f)) {
 
 
 void Surface::draw(float t) {
-    verticesValues = generateSurfaceValues(verticesGrid, f, t);
-    verticesColors = generateSurfaceColors(verticesGrid, f, t);
+    verticesValues = generateSurfaceValues(gridN, f, t);
+    verticesColors = generateSurfaceColors(gridN, f, t);
 
     glBindVertexArray(vao);
 
@@ -120,4 +138,8 @@ void Surface::updateSettings(const std::map<int, int>& settings) {
     } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
+}
+
+void Surface::updateFunction(const Function& f) {
+    this->f = f;
 }

@@ -114,7 +114,9 @@ void initSDL(SDL_GLContext& glContext, SDL_Window*& window, int& width, int& hei
     }
 }
 
-Scene::Scene() {
+Scene::Scene(const Function& defaultFunction) {
+    functions.push_back(defaultFunction);
+
     initSDL(glContext, window, width, height);
 
     glClearColor(0.2f, 0.2f, 0.2f, 0.f);
@@ -135,6 +137,10 @@ Scene::Scene() {
 Scene::~Scene() {
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
+}
+
+void Scene::addFunction(const Function& f) {
+    functions.push_back(f);
 }
 
 void Scene::addObject(std::unique_ptr<Mesh> mesh) {
@@ -309,6 +315,26 @@ void Scene::drawingLoop() {
             settings[QUALITY_N] += 1;
             for (std::unique_ptr<Mesh>& mesh : meshes) {
                 mesh ->updateSettings(settings);
+            }
+        }
+        if (button_down[SDLK_RIGHTBRACKET]) {
+            wasPressed[SDLK_RIGHTBRACKET] = true;
+        }
+        if (!button_down[SDLK_RIGHTBRACKET] && wasPressed[SDLK_RIGHTBRACKET]) {
+            wasPressed[SDLK_RIGHTBRACKET] = false;
+            functionId = (functionId + 1) % functions.size();
+            for (std::unique_ptr<Mesh>& mesh : meshes) {
+                mesh -> updateFunction(functions[functionId]);
+            }
+        }
+        if (button_down[SDLK_LEFTBRACKET]) {
+            wasPressed[SDLK_LEFTBRACKET] = true;
+        }
+        if (!button_down[SDLK_LEFTBRACKET] && wasPressed[SDLK_LEFTBRACKET]) {
+            wasPressed[SDLK_LEFTBRACKET] = false;
+            functionId = (functionId + functions.size() - 1) % functions.size();
+            for (std::unique_ptr<Mesh>& mesh : meshes) {
+                mesh -> updateFunction(functions[functionId]);
             }
         }
 

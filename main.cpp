@@ -7,17 +7,18 @@
 #include "Grid.h"
 #include "Isolines.h"
 
+#include "Functions.h"
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
 
-    Scene scene;
+    Scene scene(f_cossinsin);
 
-    Function f(
-            [](float x, float y, float t) {return cos(x) * sin(y) * sin(t);},
-            {-1, 1}, {-1, 1}, {-1, 1});
+    scene.addFunction(f_metaballs);
+//    scene.addFunction(f_perlin);
 
-    std::unique_ptr<Mesh> surface = std::make_unique<Surface>(f, 3);
-    std::unique_ptr<Mesh> isoline = std::make_unique<Isolines>(f, 3, 3);
+    std::unique_ptr<Mesh> surface = std::make_unique<Surface>(f_cossinsin, 3);
+    std::unique_ptr<Mesh> isoline = std::make_unique<Isolines>(f_cossinsin, 3, 3);
     std::unique_ptr<Mesh> grid = std::make_unique<Grid>(15);
 
     scene.addObject(std::move(surface));

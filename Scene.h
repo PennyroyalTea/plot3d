@@ -10,8 +10,9 @@
 
 class Scene {
 public:
-    Scene();
+    Scene(const Function& defaultFunction);
     ~Scene();
+    void addFunction(const Function& f);
     void addObject(std::unique_ptr<Mesh> mesh);
     void drawingLoop();
 private:
@@ -24,6 +25,9 @@ private:
     int width;
     int height;
 
+    int functionId = 0;
+
+    std::vector<Function> functions;
     std::vector<std::unique_ptr<Mesh>> meshes;
 
     std::chrono::time_point<std::chrono::high_resolution_clock> lastFrameStart;

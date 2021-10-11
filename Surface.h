@@ -7,6 +7,7 @@ public:
     Surface(Function f, int gridN);
     void draw(float t) override;
     void updateSettings(const std::map<int, int>& settings) override;
+    void updateFunction(const Function& f) override;
 private:
     Function f;
     int gridN;

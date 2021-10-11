@@ -77,3 +77,7 @@ void Isolines::updateSettings(const std::map<int, int>& settings) {
     gridN = settings.at(QUALITY_N);
     isolinesN = settings.at(ISOLINES_N);
 }
+
+void Isolines::updateFunction(const Function& f) {
+    this -> f = f;
+}

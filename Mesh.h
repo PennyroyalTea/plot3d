@@ -25,6 +25,7 @@ class Mesh {
 public:
     virtual void draw(float t) = 0;
     virtual void updateSettings(const std::map<int, int>& settings) = 0;
+    virtual void updateFunction(const Function& f) = 0;
 };
 
 struct point2D {
