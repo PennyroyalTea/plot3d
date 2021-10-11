@@ -11,10 +11,13 @@ private:
     Function f;
     int gridN;
 
-    std::vector<vertex> vertices;
+    std::vector<point2D> verticesGrid;
+    std::vector<float> verticesValues;
+    std::vector<color> verticesColors;
+
     std::vector<std::uint32_t> verticesOrder;
 
-    GLuint vbo;
+    GLuint vboGrid, vboValues, vboColors;
     GLuint vao;
     GLuint ebo;
 };

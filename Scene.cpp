@@ -4,12 +4,13 @@ const char vertex_shader_source[] =
         R"(#version 330 core
 uniform mat4 transform;
 uniform mat4 view;
-layout (location = 0) in vec3 in_position;
-layout (location = 1) in vec3 in_color;
+layout (location = 0) in vec2 in_xy;
+layout (location = 1) in float in_z;
+layout (location = 2) in vec3 in_color;
 out vec4 color;
 void main()
 {
-	gl_Position = view * transform * vec4(in_position, 1.0);
+	gl_Position = view * transform * vec4(in_xy, in_z, 1.0);
 	color = vec4(in_color, 1.0);
 }
 )";

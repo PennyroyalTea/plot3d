@@ -14,7 +14,7 @@ void addMarchingTriangle(std::vector<vertex>& res, const Function& f, int i[3], 
         if ((fx[iter] - z) * (fx[iter1] - z) < 0) {
             float k = abs(fx[iter] - z) / abs(fx[iter] - fx[iter1]);
             res.push_back(
-                    {{k * x[iter1] + (1 - k) * x[iter], k * y[iter1] + (1 - k) * y[iter], z},
+                    {k * x[iter1] + (1 - k) * x[iter], k * y[iter1] + (1 - k) * y[iter], z,
                      {0, 255, 0}});
         }
     }
@@ -49,25 +49,27 @@ std::vector<vertex> generateIsolinesVertices(int gridN, int isolinesN, Function 
 Isolines::Isolines(Function f, int gridN, int isolinesN) : f(std::move(f)), gridN(gridN), isolinesN(isolinesN) {
     vertices = generateIsolinesVertices(gridN, isolinesN, f, 0);
 
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), vertices.data(), GL_STREAM_DRAW);
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glEnableVertexAttribArray(0); // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)nullptr);
-    glEnableVertexAttribArray(1); // color
-    glVertexAttribPointer(1, 3, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex), (void*) offsetof(vertex, color));
+    glEnableVertexAttribArray(0); // xy
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)nullptr);
+    glEnableVertexAttribArray(1); // z
+    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, sizeof(vertex), (void*)(offsetof(vertex, z)));
+    glEnableVertexAttribArray(2); // color
+    glVertexAttribPointer(2, 3, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(vertex), (void*) offsetof(vertex, color));
 }
 
 void Isolines::draw(float t) {
     vertices = generateIsolinesVertices(gridN, isolinesN, f, t);
+    glBindVertexArray(vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), vertices.data(), GL_STREAM_DRAW);
-    glBindVertexArray(vao);
     glDrawArrays(GL_LINES, 0, vertices.size());
 }
 

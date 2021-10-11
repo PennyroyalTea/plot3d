@@ -14,14 +14,26 @@ const int DRAW_FACES = 0x01; // settings[DRAW_FACES] = 0/1 do surface triangle f
 const int ISOLINES_N = 0x02; // settings[ISOLINES_N] = n # of isolines
 const int QUALITY_N = 0x03; // settings[QUALITY_N] = n # of surface grid cells
 
+struct vertex {
+    float x;
+    float y;
+    float z;
+    uint8_t color[3];
+};
+
 class Mesh {
 public:
     virtual void draw(float t) = 0;
     virtual void updateSettings(const std::map<int, int>& settings) = 0;
 };
 
-struct vertex {
-    float pos[3];
-    std::uint8_t color[3];
+struct point2D {
+    float x;
+    float y;
 };
 
+struct color {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+};
