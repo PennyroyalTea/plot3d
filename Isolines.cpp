@@ -12,9 +12,14 @@ void addMarchingTriangle(std::vector<vertex>& res, const Function& f, int i[3], 
     for (int iter = 0; iter < 3; ++iter) {
         int iter1 = (iter + 1) % 3;
         if ((fx[iter] - z) * (fx[iter1] - z) < 0) {
+            float xNorm1 = 2 * ((x[iter1] - f.xRange.first) / (f.xRange.second - f.xRange.first)) - 1.f;
+            float xNorm = 2 * ((x[iter] - f.xRange.first) / (f.xRange.second - f.xRange.first)) - 1.f;
+            float yNorm1 = 2 * ((y[iter1] - f.yRange.first) / (f.yRange.second - f.yRange.first)) - 1.f;
+            float yNorm = 2 * ((y[iter] - f.yRange.first) / (f.yRange.second - f.yRange.first)) - 1.f;
+            float zNorm = 2 * ((z - f.zRange.first) / (f.zRange.second - f.zRange.first)) - 1.f;
             float k = abs(fx[iter] - z) / abs(fx[iter] - fx[iter1]);
             res.push_back(
-                    {k * x[iter1] + (1 - k) * x[iter], k * y[iter1] + (1 - k) * y[iter], z,
+                    {k * xNorm1 + (1 - k) * xNorm, k * yNorm1 + (1 - k) * yNorm, zNorm,
                      {0, 255, 0}});
         }
     }
