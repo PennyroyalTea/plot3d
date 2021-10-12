@@ -8,5 +8,6 @@
 |G|Enable/Disable showing coordinate grid|
 |+ -|Increase/Decrease # of isolines|
 |< >|Increase/Decrease Surface quality|
+|[ ]|Change displayed function|
 ## How to run
 Build CMake, run.
